@@ -23,14 +23,6 @@ The project explores and compares the performance of 10 different machine learni
 - Support Vector Machine (SVM)
 - XGBoost
 
-### Model Training and Evaluation
-The dataset is preprocessed, and each model is trained and evaluated using metrics such as:
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-
 ### Model Deployment
 - The best-performing model is serialized using Joblib and deployed as a web application using Flask.
 - Users can input patient data through a web interface and get predictions on the likelihood of heart disease.
