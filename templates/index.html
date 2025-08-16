@@ -1,140 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Prediction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-            line-height: 1.6;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Heart Disease Prediction — Interactive</title>
+<style>
+  :root{
+    --bg1:#0f2027; --bg2:#203a43; --bg3:#2c5364;
+    --card:#ffffff; --muted:#6b7280; --accent:#5eead4; --accent-2:#60a5fa;
+    --glass: rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  html,body{height:100%;margin:0;background:linear-gradient(135deg,var(--bg1),var(--bg2) 40%,var(--bg3));-webkit-font-smoothing:antialiased;color:#0b1220}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;}
+  .card{
+    width:100%; max-width:980px; background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border-radius:16px; padding:26px; box-shadow:0 10px 40px rgba(2,6,23,0.6); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.04); position:relative; overflow:hidden;
+  }
 
-        h1 {
-            text-align: center;
-            color: #444;
-            margin-bottom: 20px;
-        }
+  /* header */
+  .header{
+    display:flex; gap:18px; align-items:center; margin-bottom:18px;
+  }
+  .logo{
+    height:62px; width:62px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,var(--accent-2),var(--accent)); color:#04263b; font-weight:700; font-size:20px;
+    box-shadow:0 6px 18px rgba(96,165,250,0.12), inset 0 -2px 6px rgba(0,0,0,0.12);
+  }
+  .title{color:#fff; font-size:20px; font-weight:700;}
+  .subtitle{color:var(--muted); font-size:13px; margin-top:4px;}
 
-        form {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+  /* grid form */
+  form.form-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap:14px 18px; align-items:start;
+  }
+  @media (max-width:760px){ form.form-grid{grid-template-columns:1fr;} .header{flex-direction:column;align-items:flex-start} }
 
-        form:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+  /* floating label input */
+  .field{
+    position:relative; padding-top:8px;
+  }
+  .field input[type="text"], .field input[type="number"]{
+    width:100%; padding:12px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02); color:#fff; outline:none; font-size:14px; transition:box-shadow .18s, border-color .18s, transform .12s;
+  }
+  .field input:focus{ border-color: rgba(96,165,250,0.9); box-shadow:0 6px 20px rgba(96,165,250,0.08); transform:translateY(-1px); }
+  .label{
+    position:absolute; left:12px; top:14px; pointer-events:none; color:rgba(255,255,255,0.66); font-size:12px; transform-origin:left top;
+    transition: transform .12s, font-size .12s, top .12s, color .12s;
+  }
+  .field input:not(:placeholder-shown) + .label,
+  .field input:focus + .label{
+    transform: translateY(-22px) scale(.86); color:var(--accent-2);
+  }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
+  /* small helper */
+  .hint{font-size:12px;color:rgba(255,255,255,0.6); margin-top:6px;}
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
+  /* progress */
+  .progress-wrap{margin:18px 0 8px;}
+  .progress{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+  .progress > b{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%; transition:width .6s cubic-bezier(.2,.9,.2,1);}
 
-        input[type="text"]:focus {
-            border-color: #007BFF;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            outline: none;
-        }
+  /* actions */
+  .actions{display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:flex-end}
+  .btn{
+    padding:12px 18px;border-radius:10px;border:none;font-weight:700;background:linear-gradient(90deg,var(--accent-2),var(--accent)); color:#04263b; cursor:pointer; box-shadow:0 8px 30px rgba(96,165,250,0.12);
+    transition:transform .14s, box-shadow .14s;
+  }
+  .btn:active{transform:translateY(1px);box-shadow:0 6px 20px rgba(96,165,250,0.08)}
+  .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06)}
 
-        button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
+  /* spinner */
+  .spinner{width:18px;height:18px;border-radius:50%;border:3px solid rgba(255,255,255,0.16);border-top-color:#fff;animation:spin .9s linear infinite;display:inline-block;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
+  /* result modal */
+  .modal{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.9); width:90%; max-width:520px; background: #0b1220; color:#fff; padding:20px;border-radius:14px;
+    box-shadow:0 18px 60px rgba(2,6,23,0.8); opacity:0; pointer-events:none; transition:all .22s ease;
+  }
+  .modal.show{opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1);}
+  .modal h3{margin:0 0 8px;font-size:18px}
+  .modal .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .prob-bar{height:14px;background:rgba(255,255,255,0.08);border-radius:10px;overflow:hidden; flex:1;margin-left:12px}
+  .prob-bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width 1.2s cubic-bezier(.2,.9,.2,1)}
 
-        @media (max-width: 600px) {
-            form {
-                padding: 15px;
-            }
+  .modal .close{position:absolute; right:12px; top:12px; background:transparent;border:1px solid rgba(255,255,255,0.06); color:#fff;padding:6px 8px;border-radius:8px; cursor:pointer}
 
-            button {
-                font-size: 14px;
-            }
-        }
-    </style>
+  /* nice footer */
+  .footer{margin-top:18px; color:rgba(255,255,255,0.66); font-size:13px; display:flex;justify-content:space-between;align-items:center}
+  .badge{background:rgba(255,255,255,0.04);padding:8px 12px;border-radius:999px;font-weight:700;color:#fff; font-size:13px}
+</style>
 </head>
 <body>
-    <h1>Input Data for Prediction</h1>
-    <form action="/predictui" method="POST">
-        <label for="sex">Sex:</label>
-        <input type="text" id="sex" name="sex" required>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div class="logo">H</div>
+        <div>
+          <div class="title">Heart Disease Predictor</div>
+          <div class="subtitle">Fast, local predictions — enter patient features below</div>
+        </div>
+      </div>
 
-        <label for="age">Age:</label>
-        <input type="text" id="age" name="age" required>
+      <form id="predictForm" class="form-grid" onsubmit="return false;">
+        <!-- the server-side template must pass `features` list -->
+        {% for feature in features %}
+        <div class="field">
+          <input type="text" name="{{feature}}" id="{{feature|replace(' ','_')}}" placeholder=" " autocomplete="off" />
+          <label class="label" for="{{feature|replace(' ','_')}}">{{ feature }}</label>
+        </div>
+        {% endfor %}
 
-        <label for="cp">Chest Pain Type (cp):</label>
-        <input type="text" id="cp" name="cp" required>
+        <!-- progress & actions span full width -->
+        <div style="grid-column:1/-1">
+          <div class="progress-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div style="color:rgba(255,255,255,0.8);font-weight:700">Completion</div>
+              <div id="progressText" style="color:var(--accent);font-weight:700">0 / {{ features|length }}</div>
+            </div>
+            <div class="progress"><b id="progressBar"></b></div>
+          </div>
 
-        <label for="resting_BP">Resting Blood Pressure:</label>
-        <input type="text" id="resting_BP" name="resting_BP" required>
+          <div class="actions">
+            <button id="resetBtn" class="btn secondary" type="button">Clear</button>
+            <button id="submitBtn" class="btn" type="button">
+              <span id="btnText">Predict</span>
+              <span id="btnSpinner" style="display:none;margin-left:10px"><span class="spinner"></span></span>
+            </button>
+          </div>
+        </div>
+      </form>
 
-        <label for="chol">Cholesterol:</label>
-        <input type="text" id="chol" name="chol" required>
+      <div class="footer">
+        <div class="badge">Local demo</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6)">Model: best_model.pkl</div>
+      </div>
+    </div>
+  </div>
 
-        <label for="fbs">Fasting Blood Sugar:</label>
-        <input type="text" id="fbs" name="fbs" required>
+  <!-- result modal -->
+  <div id="resultModal" class="modal" aria-hidden="true">
+    <button class="close" onclick="closeModal()">✕</button>
+    <h3 id="resultTitle">Prediction</h3>
+    <div id="resultText" style="font-size:18px;color:var(--accent-2);margin-top:8px;font-weight:800"></div>
 
-        <label for="restecg">Resting ECG:</label>
-        <input type="text" id="restecg" name="restecg" required>
+    <div class="row" style="margin-top:16px">
+      <div style="min-width:110px;font-size:13px;color:#cbd5e1">No Disease</div>
+      <div class="prob-bar"><i id="noBar"></i></div>
+      <div id="noPct" style="min-width:52px;text-align:right;color:#fff;font-weight:700;margin-left:12px">0%</div>
+    </div>
 
-        <label for="thalach">Maximum Heart Rate Achieved (thalach):</label>
-        <input type="text" id="thalach" name="thalach" required>
+    <div class="row" style="margin-top:10px">
+      <div style="min-width:110px;font-size:13px;color:#cbd5e1">Disease</div>
+      <div class="prob-bar"><i id="yesBar"></i></div>
+      <div id="yesPct" style="min-width:52px;text-align:right;color:#fff;font-weight:700;margin-left:12px">0%</div>
+    </div>
 
-        <label for="exang">Exercise Induced Angina (exang):</label>
-        <input type="text" id="exang" name="exang" required>
+    <div style="margin-top:18px; display:flex; justify-content:center;">
+      <button class="btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
 
-        <label for="oldpeak">ST Depression (oldpeak):</label>
-        <input type="text" id="oldpeak" name="oldpeak" required>
+<script>
+  const form = document.getElementById('predictForm');
+  const fields = Array.from(form.querySelectorAll('input'));
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+  const btnSpinner = document.getElementById('btnSpinner');
+  const resetBtn = document.getElementById('resetBtn');
 
-        <label for="slope">Slope:</label>
-        <input type="text" id="slope" name="slope" required>
+  // animate entering inputs (stagger)
+  fields.forEach((f, i) => {
+    f.style.opacity = 0; f.style.transform = 'translateY(8px)';
+    setTimeout(()=>{ f.style.transition='all .36s cubic-bezier(.2,.9,.2,1)'; f.style.opacity=1; f.style.transform='translateY(0)'; }, 60*i);
+  });
 
-        <label for="ca">Number of Major Vessels (ca):</label>
-        <input type="text" id="ca" name="ca" required>
+  function updateProgress(){
+    const total = fields.length;
+    const filled = fields.filter(f => f.value.trim() !== '').length;
+    const pct = Math.round((filled/total) * 100);
+    progressBar.style.width = pct + '%';
+    progressText.textContent = `${filled} / ${total}`;
+  }
+  fields.forEach(f => f.addEventListener('input', updateProgress));
+  updateProgress();
 
-        <label for="thal">Thal:</label>
-        <input type="text" id="thal" name="thal" required>
+  resetBtn.addEventListener('click', ()=>{
+    fields.forEach(f => f.value = '');
+    updateProgress();
+  });
 
-        <label for="Max Heart Rate Reserve">Max Heart Rate Reserve:</label>
-        <input type="text" id="Max Heart Rate Reserve" name="Max Heart Rate Reserve" required>
+  // helper to gather payload keys exactly as template names
+  function buildPayload(){
+    const payload = {};
+    fields.forEach(f => {
+      // original feature names are in the label text for mapping
+      const label = form.querySelector(`label[for="${f.id}"]`).textContent.trim();
+      // preserve original string key casing (server expects exact keys)
+      payload[label] = f.value.trim();
+    });
+    return payload;
+  }
 
-        <label for="Heart Disease Risk Score">Heart Disease Risk Score:</label>
-        <input type="text" id="Heart Disease Risk Score" name="Heart Disease Risk Score" required>
+  // open modal animate bars
+  function showResult(prediction, probaNo, probaYes){
+    document.getElementById('resultTitle').textContent = 'Prediction';
+    document.getElementById('resultText').textContent = prediction === 1 || prediction === '1' ? '🚨 Likely Disease' : '✅ Low Risk';
+    const noBar = document.getElementById('noBar'), yesBar = document.getElementById('yesBar');
+    const noPct = document.getElementById('noPct'), yesPct = document.getElementById('yesPct');
+    // convert to percentages
+    const n = Math.round(probaNo * 100), y = Math.round(probaYes * 100);
+    noBar.style.width = '0%'; yesBar.style.width = '0%';
+    noPct.textContent = '0%'; yesPct.textContent = '0%';
+    const modal = document.getElementById('resultModal');
+    modal.classList.add('show');
 
-        <button type="submit">Submit</button>
-    </form>
+    // animate bars with slight delay
+    setTimeout(()=>{
+      noBar.style.width = n + '%';
+      noPct.textContent = n + '%';
+    }, 180);
+
+    setTimeout(()=>{
+      yesBar.style.width = y + '%';
+      yesPct.textContent = y + '%';
+    }, 420);
+
+    // subtle confetti canvas
+    confettiBurst();
+  }
+
+  function closeModal(){
+    const modal = document.getElementById('resultModal');
+    modal.classList.remove('show');
+  }
+
+  // AJAX submit handler
+  submitBtn.addEventListener('click', async ()=>{
+    // basic validation
+    const missing = fields.filter(f => f.value.trim()==='').map(f => form.querySelector(`label[for="${f.id}"]`).textContent.trim());
+    if(missing.length){
+      // quick shake animation
+      submitBtn.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}], {duration:350, iterations:1});
+      alert('Please fill all fields: ' + missing.join(', '));
+      return;
+    }
+
+    // show loading
+    btnText.style.opacity = 0; btnSpinner.style.display = 'inline-block';
+
+    try {
+      const payload = buildPayload();
+      const resp = await fetch('/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+      if(!resp.ok) throw new Error('Server: ' + resp.status);
+      const data = await resp.json();
+
+      // server returns: {prediction: int, probability: { 'No Disease': x, 'Disease': y }}
+      const pred = data.prediction;
+      const pNo = data.probability['No Disease'];
+      const pYes = data.probability['Disease'];
+
+      // smooth button reset
+      btnSpinner.style.display = 'none'; btnText.style.opacity = 1;
+      showResult(pred, pNo, pYes);
+    } catch(err){
+      btnSpinner.style.display = 'none'; btnText.style.opacity = 1;
+      alert('Prediction failed: ' + err.message);
+    }
+  });
+
+  // small confetti effect (canvas-free, DOM rectangles)
+  function confettiBurst(){
+    const count = 18;
+    for(let i=0;i<count;i++){
+      const el = document.createElement('div');
+      el.style.position='fixed';
+      el.style.left = (50 + (Math.random()*240-120)) + '%';
+      el.style.top = (48 + (Math.random()*40-20)) + '%';
+      el.style.width = (6 + Math.random()*8)+'px';
+      el.style.height = (8 + Math.random()*8)+'px';
+      el.style.background = ['#5eead4','#60a5fa','#f472b6','#facc15'][Math.floor(Math.random()*4)];
+      el.style.transform = 'rotate('+Math.floor(Math.random()*360)+'deg)';
+      el.style.opacity = '0.95';
+      el.style.borderRadius = '2px';
+      el.style.zIndex = '9999';
+      el.style.transition = 'transform 900ms cubic-bezier(.2,.9,.2,1), top 900ms ease-out, opacity 900ms';
+      document.body.appendChild(el);
+      setTimeout(()=>{ el.style.transform = 'translateY(140px) rotate(60deg) scale(.8)'; el.style.top = (70 + Math.random()*40)+'%'; el.style.opacity='0'; }, 20 + Math.random()*80);
+      setTimeout(()=>document.body.removeChild(el), 1200);
+    }
+  }
+</script>
 </body>
 </html>
