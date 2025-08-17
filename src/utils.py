@@ -15,12 +15,12 @@ FEATURE_COLS = [
 TARGET_COL = "target"
 
 def load_data():
-    df = pd.read_csv("heartv1.csv")
+    df = pd.read_csv("../data/raw/heartv1.csv")
     return df
 
-def preprocess_data(df, save_scaler=False, scaler_path="models/scaler.pkl"):
+def preprocess_data(df, save_scaler=False, scaler_path="../models/scaler.pkl", encoder_path="../models/labelencoder.pkl"):
    
-    le= LabelEncoder()
+    le = LabelEncoder()
     
     df["sex"] = le.fit_transform(df["sex"].astype(str))
     # select columns, ensure order
@@ -34,10 +34,12 @@ def preprocess_data(df, save_scaler=False, scaler_path="models/scaler.pkl"):
     if save_scaler:
         Path(scaler_path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(scaler, scaler_path)
+        joblib.dump(le, encoder_path)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X_scaled, y, test_size=0.2, random_state=42, stratify=y
     )
-    return X_train, X_test, y_train, y_test,print('yay')
+    print('yay')
+    return X_train, X_test, y_train, y_test
 
 

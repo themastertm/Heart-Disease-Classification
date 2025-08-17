@@ -3,7 +3,7 @@ import joblib, os
 from src.utils import load_data, preprocess_data
 from sklearn.metrics import accuracy_score
 
-def select_best_model(models_dir="models"):
+def select_best_model(models_dir="../models"):
     df = load_data()
     X_train, X_test, y_train, y_test = preprocess_data(df, save_scaler=False)
 
@@ -11,7 +11,7 @@ def select_best_model(models_dir="models"):
     best_path = None
 
     for fn in os.listdir(models_dir):
-        if fn.endswith(".pkl") and fn != "best_model.pkl":
+        if fn.endswith(".pkl") and fn != "best_model.pkl" and not fn.startswith("label") and not fn.startswith("scaler"):
             path = os.path.join(models_dir, fn)
             model = joblib.load(path)
             y_pred = model.predict(X_test)
@@ -23,7 +23,7 @@ def select_best_model(models_dir="models"):
 
     if best_path:
         joblib.dump(joblib.load(best_path), os.path.join(models_dir, "best_model.pkl"))
-        print(f"Best model saved: {best_path} -> models/best_model.pkl (acc={best_acc:.4f})")
+        print(f"Best model saved: {best_path} -> ../models/best_model.pkl (acc={best_acc:.4f})")
         return best_path, best_acc
 
 if __name__ == "__main__":

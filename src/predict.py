@@ -6,8 +6,8 @@ import warnings
 warnings.filterwarnings('ignore')
 from src.utils import FEATURE_COLS
 
-MODEL_PATH = "models/best_model.pkl"
-SCALER_PATH = "models/scaler.pkl"
+MODEL_PATH = "../models/best_model.pkl"
+SCALER_PATH = "../models/scaler.pkl"
 
 def load_artifacts():
     model = joblib.load(MODEL_PATH)

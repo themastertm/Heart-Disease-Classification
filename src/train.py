@@ -26,11 +26,11 @@ def train_models():
         'catboost': CatBoostClassifier(random_state=42, verbose=False)
     }
 
-    os.makedirs("models", exist_ok=True)
+    os.makedirs("../models", exist_ok=True)
 
     for name, model in models.items():
         model.fit(X_train, y_train)
-        path = f"models/{name}.pkl"
+        path = f"../models/{name}.pkl"
         joblib.dump(model, path)
         print(f"Saved {name} -> {path}")
 

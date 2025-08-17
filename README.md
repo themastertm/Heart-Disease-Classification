@@ -1,9 +1,14 @@
 # Heart Disease Classification
 
- Done By:
-Akram Mohamed (KemoMoh11)</br>
-Bassam Hassan (bassam1231)</br>
-Mahmoud Maher (themastertm)</br>
+## Done by: </br>
+**Akram Mohamed** ([KemoMoh11](https://github.com/KemoMoh11))</br>
+**Bassam Hassan** ([bassam1231](https://github.com/bassam1231))</br>
+**Mahmoud Maher** ([themastertm](https://github.com/themastertm))</br>
+
+## Special Thanks to: </br>
+
+**Mohanad Sabry** ([MohanadSabry](https://github.com/MohandSabry)) </br>
+For testing this project.
 
 ## Overview
 This repository contains a Heart Disease Classification project that aims to predict the presence of heart disease in patients using machine learning. The project leverages multiple machine learning models, including AdaBoost, Bagging, CatBoost, Extra Trees, Gradient Boosting, LightGBM, Logistic Regression, Random Forest, SVM, and XGBoost. The best-performing model is deployed as a web application using Flask and Joblib for model serialization.
